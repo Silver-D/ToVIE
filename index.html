@@ -16,23 +16,43 @@
         <table cellspacing="0" cellpadding="0">
             <tr>
                 <td colspan="3" style="padding-bottom:4px;">
+                    <a href="#" onClick="$('read_me').style.display = ($('read_me').style.display == 'none') ? 'block' : 'none';  return false;">READ ME</a>
+                    <div id="read_me" style="display:none;">
+                        <ul>
+                            <li>
+                                Your item.svo file is in the game's install directory. In the Steam verison, it's typically in Program Files (x64)/Steam/steamapps/common/ToV/Data64.
+                            </li>
+                            <li>
+                                The file that you import here is not modified in any way. To edit items you need to press Apply to every item that you make changes to and then use the Download button below the form. The new item.svo should be downloaded to your Downloads directory and it is your responsibility to backup the original item.svo in the game's install directory before placing the newly downloaded file there.
+                            </li>
+                            <li>I would suggest unequipping items before modifying them. It is untested how the game will react if suddenly a skill on a weapon changes that a character hasn't completely learned yet, etc. Some changes (like attack affinity and elemental res) require re-equipping the item before the effects are fully applied.</li>
+                            <li>
+                                Item and skill names were parsed from <a href="https://hyouta.com/vesperia/" target="_blank">https://hyouta.com/vesperia/</a>. It is an amazing resource without which most of this editor would not be possible.
+                            </li>
+                            <li>Thanks to eligrey for the wonderful <a href="https://github.com/eligrey/FileSaver.js/" target="_blank">filesaver.js</a> library.</li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" style="padding-bottom:4px;">
                     Import your ToV <b>item.svo</b> file: <input type="file" name="file" id="file" disabled>
                 </td>
             </tr>
             <tr>
                 <td style="border:1px solid #000000;" valign="top">
                     <table id="search" cellspacing="0" cellpadding="4" style="display:none;">
-                        <tr><td colspan="2">Weapons: <span id="w_cnt"></span> Subweapons: <span id="s_cnt"></span><br>Helmets: <span id="h_cnt"></span> Armors: <span id="a_cnt"></span> Trinkets: <span id="t_cnt"></span></td></tr>
+                        <tr><td colspan="3">Weapons: <span id="w_cnt"></span> Subweapons: <span id="s_cnt"></span><br>Helmets: <span id="h_cnt"></span> Armors: <span id="a_cnt"></span> Trinkets: <span id="t_cnt"></span></td></tr>
                         <tr>
-                            <td colspan="2"><b>Search for an item by:</b></td>
+                            <td colspan="3"><b>Search for an item by:</b></td>
                         </tr>
                         <tr>
-                            <td>Title: <input type="text" id="s_title" size="24"></td>
+                            <td>Title: </td><td><input type="text" id="s_title" style="width:150px;"></td>
                             <td><input type="button" name="" value="Search" onClick="ui.searchTitle();"></td>
                         </tr>
                         <tr>
-                            <td>Category: <select id="s_cat" style="width:150px;"></select></td>
-                            <td><input type="button" name="" value="Search" onClick="ui.searchCat();"></td>
+                            <td>Category: </td><td><select id="s_cat" style="width:150px;"></select></td>
+                            <td><input type="button" name="" value="Search" onClick="ui.searchType();"></td>
                         </tr>
                     </table>
                 </td>
@@ -60,7 +80,7 @@
                         </tr>
                         <tr id="atk_aff" >
                             <td>EDMG:</td>
-							<td colspan="5"><label><input class="ele_input" type="checkbox" id="elef">Fire</label> <label><input class="ele_input" type="checkbox" id="elee">Earth</label> <label><input class="ele_input" type="checkbox" id="elew">Wind</label> <label><input class="ele_input" type="checkbox" id="elei">Ice</label> <label><input class="ele_input" type="checkbox" id="elel">Light</label> <label><input class="ele_input" type="checkbox" id="eled">Dark</label></td>
+							<td colspan="5"><label><input type="checkbox" id="aelef">Fire</label> <label><input type="checkbox" id="aelee">Earth</label> <label><input type="checkbox" id="aelew">Wind</label> <label><input type="checkbox" id="aelei">Ice</label> <label><input  type="checkbox" id="aelel">Light</label> <label><input type="checkbox" id="aeled">Dark</label></td>
                         </tr>
 						<tr id="ele_res" style="display:none;">
 							<td colspan="6">
@@ -69,14 +89,14 @@
 										<td colspan="8">Elemental <b>damage taken</b>:</td>
 									</tr>
 									<tr>
-										<td>Fire:</td><td><input class="ele_input" type="text" id="elef" size="3" maxlength="4"></td>
-										<td>Earth:</td><td><input class="ele_input" type="text" id="elee" size="3" maxlength="4"></td>
-										<td>Wind:</td><td><input class="ele_input" type="text" id="elew" size="3" maxlength="4"></td>
+										<td>Fire:</td><td><input type="text" id="elef" size="4" maxlength="4"></td>
+										<td>Earth:</td><td><input type="text" id="elee" size="4" maxlength="4"></td>
+										<td>Wind:</td><td><input type="text" id="elew" size="4" maxlength="4"></td>
 									</tr>
 									<tr>
-										<td>Ice:</td><td><input class="ele_input" type="text" id="elei" size="3" maxlength="4"></td>
-										<td>Light:</td><td><input class="ele_input" type="text" id="elel" size="3" maxlength="4"></td>
-										<td>Dark:</td><td><input class="ele_input" type="text" id="eled" size="3" maxlength="4"></td>
+										<td>Ice:</td><td><input type="text" id="elei" size="4" maxlength="4"></td>
+										<td>Light:</td><td><input type="text" id="elel" size="4" maxlength="4"></td>
+										<td>Dark:</td><td><input type="text" id="eled" size="4" maxlength="4"></td>
 									</tr>
 									<tr>
 										<td colspan="6">

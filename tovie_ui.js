@@ -11,13 +11,14 @@ var ui =
 {
     init: function()
     {
-        $('file').disabled = false;
-        $('search').style.display = 'none';
-        $('results').style.display = 'none';
-        $('item_info').style.display = 'none';
-        $('file').value = '';
+        $('file').value      = '';
+        $('file').disabled   = false;
         $('s_cat').innerHTML = '';
-		$('download').style.display='none';
+        
+        $('search').style.display    = 'none';
+        $('results').style.display   = 'none';
+        $('item_info').style.display = 'none';
+        $('download').style.display  = 'none';
 		
 		if ($('skill1').options.length > 1)
 		return;
@@ -49,10 +50,10 @@ var ui =
     
     loaded: function()
     {
+        $('file').value    = '';
         $('file').disabled = false;
         
         $('search').style.display = 'block';
-        $('file').value = '';
         
         $('w_cnt').innerHTML = items.weapons;
         $('s_cnt').innerHTML = items.subweapons;
@@ -91,14 +92,14 @@ var ui =
         return this.results(results);
     },
     
-    searchCat: function()
+    searchType: function()
     {
-        var cat   = $('s_cat').value;
+        var type    = $('s_cat').value;
         var results = [];
         
         items.list.forEach((e, k) =>
         {
-            if (e.type.h == cat)
+            if (e.type.h == type)
             results.push(k);
         });
         
@@ -107,10 +108,11 @@ var ui =
     
     results: function(results)
     {
-        $('results').style.display = 'block';
-        $('sel_item').innerHTML = '';
+        $('results').style.display   = 'block';
         $('item_info').style.display = 'none';
-		$('download').style.display='';
+		$('download').style.display  = '';
+		
+		$('sel_item').innerHTML = '';
         
         results.forEach(r =>
         {
@@ -129,118 +131,104 @@ var ui =
 		}
     },
     
-    displayItem: function(k)
+    displayItem: function(key)
     {
-        var v 		= items.list[k];
+        var item    = items.list[key];
+        var type    = types[item.type.h];
 		var el_type = '';
         
-        if (!v)
+        if (!item)
         return;
 		
-        $('title').innerHTML = `${db.items[v.id.h]} (${v.id.h})`;
+        $('title').innerHTML = `${db.items[item.id.h]}`;
+        
         $('item_info').style.display = 'block';
+		$('ele_res').style.display   = 'none';
+		$('atk_aff').style.display   = 'none';
+		$('skills').style.display    = 'none';
 		
-		$('ele_res').style.display = 'none';
-		$('atk_aff').style.display = 'none';
-		$('skills').style.display = 'none';
-		
-		$$('.ele_input').forEach(e =>
-		{
-			if (!e.getAttribute('id_orig'))
-			e.setAttribute('id_orig', e.getAttribute('id'));
-			
-			e.setAttribute('id', '');
-		});
-		
-		if (types[v.type.h] == 'weapons')
+		if (type == 'weapons')
 		el_type = 'atk_aff';
 		
-		else if (types[v.type.h] != 'subweapons')
+		else if (type != 'subweapons')
 		el_type = 'ele_res';
 		
-		if (types[v.type.h] == 'weapons' || types[v.type.h] == 'subweapons')
-		$('skills').style.display = 'table-row';
-		
 		if (el_type)
-		{
-			$(el_type).style.display = 'table-row';
-			
-			$$('#' + el_type + ' input').forEach(e => { e.setAttribute('id', e.getAttribute('id_orig')) });
-		}
+		$(el_type).style.display = 'table-row';
+		
+		if (type == 'weapons' || type == 'subweapons')
+		$('skills').style.display = 'table-row';
 		
 		$('debug').innerHTML = '<tr><td colspan="2"><b>Debug info:</b></td></tr>';
         
-        for (let i in attrs)
+        for (let a in attrs)
         {
-            if (!attrs.hasOwnProperty(i))
+            if (!attrs.hasOwnProperty(a))
             continue;
 			
-			if (attrs[i].debug)
-			$('debug').innerHTML += `<tr><td>${i}:</td><td>${v[i].h}</td></tr>`;
+			if (attrs[a].debug)
+			$('debug').innerHTML += `<tr><td>${a}:</td><td>${item[a].h}</td></tr>`;
             
-            let p = $(i);
+            let e = $(a);
             
-            if (!p)
+            if (!e)
             continue;
             
-            if (i == 'elef' || i == 'elei' || i == 'elew' || i == 'elee' || i == 'eled' || i == 'elel')
+            if (['elef', 'elei', 'elew', 'elee', 'eled', 'elel'].indexOf(a) != -1)
 			{
-				if (types[v.type.h] == 'weapons')
-				p.checked = Boolean(v[i].d);
+				if (type == 'weapons')
+				$('a' + a).checked = Boolean(item[a].d);
 				
-				else if (types[v.type.h] != 'subweapons')
-				{
-					if (v[i].d > 0)
-					p.value = '+' + v[i].d;
-					
-					else
-					p.value = v[i].d;
-				}
+				else if (type != 'subweapons')
+				e.value = (item[a].d > 0) ? '+' + item[a].d : item[a].d;
 			}
             
 			else
-            p.value = v[i].d;
+            e.value = item[a].d;
         }
+        
+        $('debug').innerHTML += "<tr><td colspan='2'><a href='#' onClick='console.log( { " + key + ": items.list[$(\"sel_item\").value] }); return false;'>Dump item to console.log</a></td></tr>";
     },
 	
 	apply: function()
 	{
-		var k    = $('sel_item').value;
-		var v 	 = items.list[k];
+		var key  = $('sel_item').value;
+		var item = items.list[key];
+		var type = types[item.type.h];
 		var data = { };
 		
-		for (let i in attrs)
+		for (let a in attrs)
         {
-            if (!attrs.hasOwnProperty(i))
+            if (!attrs.hasOwnProperty(a))
             continue;
             
-            let p = $(i);
+            let e = $(a);
             
-            if (!p)
+            if (!e)
             continue;
-			
-			if (types[v.type.h] != 'weapons' && types[v.type.h] != 'subweapons')
+		
+			if (type != 'weapons' && type != 'subweapons')
 			{
-				if (i.includes('skill'))
+				if (a.includes('skill'))
 				continue;
 			}
 			
-            if (i == 'elef' || i == 'elei' || i == 'elew' || i == 'elee' || i == 'eled' || i == 'elel')
+            if (['elef', 'elei', 'elew', 'elee', 'eled', 'elel'].indexOf(a) != -1)
 			{
-				if (types[v.type.h] == 'weapons')
-				data[i] = Number(p.checked);
+				if (type == 'weapons')
+				data[a] = Number($('a' + a).checked);
 				
-				else if (types[v.type.h] != 'subweapons')
-				data[i] = Number(p.value);
+				else if (type != 'subweapons')
+				data[a] = parseInt(e.value) || 0;
 			}
             
 			else
-            data[i] = p.value;
+            data[a] = parseInt(e.value) || 0;
         }
 		
-		setAttrs(v.index, k, data);
+		setAttrs(key, data);
 		
-		this.displayItem(k);
+		this.displayItem(key);
 	},
 	
 	download: function()

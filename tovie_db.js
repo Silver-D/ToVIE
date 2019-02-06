@@ -1,7 +1,6 @@
 /*
-	Data IDs to names parsed from https://hyouta.com/vesperia/index.php
+	Data IDs to names parsed from https://hyouta.com/vesperia/
 	Never would have been possible without their site. Simply amazing resource.
-	
 */
 
 var db = { };

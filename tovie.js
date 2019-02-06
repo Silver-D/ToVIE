@@ -13,7 +13,7 @@ var types =
 
 var attrs =
 {
-    'id':       { offs:  2,  size: 2,  debug: false, },
+    'id':       { offs:  2,  size: 2,  debug: true,  },
     'type':     { offs: 31,  size: 1,  debug: true,  },
     'type_a?':  { offs: 20,  size: 4,  debug: true,  },
 	'type_b?':  { offs: 24,  size: 4,  debug: true,  },
@@ -86,42 +86,40 @@ function processBinary(result)
     items.total++;
 }
 
-function processItem(item)
+function processItem(index)
 {
-    item = info.header + (item * info.item);
-    
-    var id    = getAttr('id', item).d;
-    var type  = getAttr('type', item).h;
-    var cat   = types[type];
+    var offset = info.header + (index * info.item);
+    var id     = getAttr('id', offset).d;
+    var type   = types[getAttr('type', offset).h];
     
     if (items.total && !id)
     return false;
 
-    if (typeof cat == 'undefined')
+    if (typeof type == 'undefined')
     return true;
     
     items.list.push({ });
     
-    for (let i in attrs)
+    for (let a in attrs)
     {
-        if (!attrs.hasOwnProperty(i))
+        if (!attrs.hasOwnProperty(a))
         continue;
         
-        items.list[items.list.length - 1][i]       = getAttr(i, item);
+        items.list[items.list.length - 1][a]       = getAttr(a, offset);
         items.list[items.list.length - 1]['index'] = items.total;
     }
     
-    items[cat]++;
+    items[type]++;
     
     return true;
 }
 
-function getAttr(a, item)
+function getAttr(a, offset)
 {
     var ret = '';
     
     for (let i = 0; i < attrs[a].size; i++)
-        ret += toHex(bin[item + attrs[a].offs + i], 2);
+        ret += toHex(bin[offset + attrs[a].offs + i], 2);
         
     if (a == 'icon')
     return { h: hex2ascii(ret), d: ''};
@@ -129,30 +127,31 @@ function getAttr(a, item)
     return { h: ret, d: toInt(ret) };
 }
 
-function setAttrs(item, key, data)
+function setAttrs(key, data)
 {
-    item = info.header + (item * info.item);
+    var index  = items.list[key].index;
+    var offset = info.header + (index * info.item);
     
-    for (let i in data)
+    for (let a in data)
     {
-        if (!data.hasOwnProperty(i) || !attrs[i])
+        if (!data.hasOwnProperty(a) || !attrs[a])
         continue;
 		
-		if (data[i] < 0)
+		if (data[a] < 0)
 		{
-			if (attrs[i].size == 4)
-			data[i] = new Uint32Array([data[i]])[0];
+			if (attrs[a].size == 4)
+			data[a] = new Uint32Array([data[a]])[0];
 			
-			if (attrs[i].size == 2)
-			data[i] = new Uint16Array([data[i]])[0];
+			else if (attrs[a].size == 2)
+			data[a] = new Uint16Array([data[a]])[0];
 		}
+		
+		let v = toHex(data[a], attrs[a].size * 2);
         
-        let v = toHex(data[i], attrs[i].size * 2);
+        for (let i = 0; i < attrs[a].size; i++)
+        bin[offset + attrs[a].offs + i] = parseInt(v.substr(i * 2, 2), 16);
         
-        for (let j = 0; j < attrs[i].size; j++)
-        bin[item + attrs[i].offs + j] = parseInt(v.substr(j * 2, 2), 16);
-        
-        items.list[key][i] = getAttr(i, item);
+        items.list[key][a] = getAttr(a, offset);
     }
 }
 
@@ -173,7 +172,7 @@ function toInt(hex)
 	if (hex.length == 8)
 	val = new Int32Array([val])[0];
 	
-	if (hex.length == 4)
+	else if (hex.length == 4)
 	val = new Int16Array([val])[0];
 	
 	return val;
