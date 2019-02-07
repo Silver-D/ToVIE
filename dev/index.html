@@ -1,0 +1,179 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=0">
+        <title>ToVIE - Tales of Vesperia Item Editor</title>
+        <style>
+            td
+            {
+                font-size: 14px;
+            }
+        </style>
+    </head>
+    <body>
+        <table cellspacing="0" cellpadding="0">
+            <tr>
+                <td colspan="3" style="padding-bottom:4px;">
+                    <a href="#" onClick="$('read_me').style.display = ($('read_me').style.display == 'none') ? 'block' : 'none';  return false;">READ ME</a>
+                    <div id="read_me" style="display:none;">
+                        <ul>
+                            <li>
+                                Your item.svo file is in the game's install directory. In the Steam verison, it's typically in Program Files (x64)/Steam/steamapps/common/ToV/Data64.
+                            </li>
+                            <li>
+                                The file that you import here is not modified in any way. To edit items you need to press Apply to every item that you make changes to and then use the Download button below the form. The new item.svo should be downloaded to your Downloads directory and it is your responsibility to backup the original item.svo in the game's install directory before placing the newly downloaded file there.
+                            </li>
+                            <li>I would suggest unequipping items before modifying them. It is untested how the game will react if suddenly a skill on a weapon changes that a character hasn't completely learned yet, etc. Some changes (like attack affinity and elemental res) require re-equipping the item before the effects are fully applied.</li>
+                            <li>
+                                Item and skill names were parsed from <a href="https://hyouta.com/vesperia/" target="_blank">https://hyouta.com/vesperia/</a>. It is an amazing resource without which most of this editor would not be possible.
+                            </li>
+                            <li>Thanks to eligrey for the wonderful <a href="https://github.com/eligrey/FileSaver.js/" target="_blank">filesaver.js</a> library.</li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" style="padding-bottom:4px;">
+                    Import your ToV <b>item.svo</b> file: <input type="file" name="file" id="file" disabled>
+                </td>
+            </tr>
+            <tr>
+                <td style="border:1px solid #000000;" valign="top">
+                    <table id="search" cellspacing="0" cellpadding="4" style="display:none;">
+                        <tr><td colspan="3">Weapons: <span id="w_cnt"></span> Subweapons: <span id="s_cnt"></span><br>Helmets: <span id="h_cnt"></span> Armors: <span id="a_cnt"></span> Trinkets: <span id="t_cnt"></span></td></tr>
+                        <tr>
+                            <td colspan="3"><b>Search for an item by:</b></td>
+                        </tr>
+                        <tr>
+                            <td>Title: </td><td><input type="text" id="s_title" style="width:150px;"></td>
+                            <td><input type="button" name="" value="Search" onClick="ui.searchTitle();"></td>
+                        </tr>
+                        <tr>
+                            <td>Category: </td><td><select id="s_cat" style="width:150px;"></select></td>
+                            <td><input type="button" name="" value="Search" onClick="ui.searchType();"></td>
+                        </tr>
+                    </table>
+                </td>
+                <td style="border:1px solid #000000;" valign="top">
+                    <table id="results" cellspacing="0" cellpadding="4" style="display:none;">
+                        <tr>
+                            <td><select name="" id="sel_item" onChange="ui.displayItem(this.value);" size="22" style="min-width:250px;"></select></td>
+                        </tr>
+                    </table>
+                </td>
+                <td style="border:1px solid #000000;" valign="top">
+                    <table id="item_info" cellspacing="0" cellpadding="2" style="display:none;" border="1">
+                        <tr>
+                            <td colspan="3" align="left"><b id="title"></b></td>
+                        </tr>
+                        <tr>
+                            <td valign="top" style="border:0px solid #000000;">
+                                <table cellspacing="0" cellpadding="4" border="1">
+                                    <tr>
+                                        <td>PATK:</td><td><input type="text" size="3" maxlength="4" id="patk"></td>
+                                        <td>PDEF:</td><td><input type="text" size="3" maxlength="4" id="pdef"></td>
+                                        <td>AGL:</td><td><input type="text" size="3" maxlength="4" id="agl"></td>
+                                    </tr>
+                                     <tr>
+                                        <td>MATK:</td><td><input type="text" size="3" maxlength="4" id="matk"></td>
+                                        <td>MDEF:</td><td><input type="text" size="3" maxlength="4" id="mdef"></td>
+                                        <td colspan="2">&nbsp;</td>
+                                    </tr>
+                                    <tr id="atk_aff" >
+                                        <td>EDMG:</td>
+                                        <td colspan="5"><label><input type="checkbox" id="aelef">Fire</label> <label><input type="checkbox" id="aelee">Earth</label> <label><input type="checkbox" id="aelew">Wind</label> <label><input type="checkbox" id="aelei">Ice</label> <label><input  type="checkbox" id="aelel">Light</label> <label><input type="checkbox" id="aeled">Dark</label></td>
+                                    </tr>
+                                    <tr id="ele_res" style="display:none;">
+                                        <td colspan="6">
+                                            <table cellspacing="0" cellpadding="2">
+                                                <tr>
+                                                    <td colspan="8">Elemental <b>damage taken</b>:</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Fire:</td><td><input type="text" id="elef" size="4" maxlength="4"></td>
+                                                    <td>Earth:</td><td><input type="text" id="elee" size="4" maxlength="4"></td>
+                                                    <td>Wind:</td><td><input type="text" id="elew" size="4" maxlength="4"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Ice:</td><td><input type="text" id="elei" size="4" maxlength="4"></td>
+                                                    <td>Light:</td><td><input type="text" id="elel" size="4" maxlength="4"></td>
+                                                    <td>Dark:</td><td><input type="text" id="eled" size="4" maxlength="4"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="6">
+                                                </tr>
+                                            </table>
+                                            <div style="width:350px; font-size:12px"><i>Negative values are resistances and positive values are weaknesses.<br>-200 nullifies an element's damage, while +100 increases it by 50%. According to item descriptions, anyway.</i></div>
+                                        </td>
+                                    </tr>
+                                    <tr id="skills" style="display:none;">
+                                        <td colspan="6">
+                                            <table cellspacing="0" cellpadding="2">
+                                                <tr>
+                                                    <td>Skill 1:</td>
+                                                    <td><select id="skill1"><option value="0">---</option></select></td>
+                                                    <td><input id="skill1_r" type="text" size="3" maxlength="3"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Skill 2:</td>
+                                                    <td><select id="skill2"><option value="0">---</option></select></td>
+                                                    <td><input id="skill2_r" type="text" size="3" maxlength="3"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Skill 3:</td>
+                                                    <td><select id="skill3"><option value="0">---</option></select></td>
+                                                    <td><input id="skill3_r" type="text" size="3" maxlength="3"></td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td valign="top" style="border:0px solid #000000;" id="synth_block_1">
+                                <table cellspacing="0" class="synth" cellpadding="4" border="1" id="synth_">
+                                    <tr>
+                                        <td colspan="2">Synth <span class="synth" id="synth_num_"></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Level: <input class="synth" id="synth_l_" type="text" size="2" maxlength="2"></td>
+                                        <td>Price: <input class="synth" id="synth_p_" type="text" size="6" maxlength="6"></td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td valign="top" id="synth_block_2" style="border:0px solid #000000;">
+                                
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" align="center" style="padding:8px;"><input type="button" value="Apply" style="width:300px;" onClick="ui.apply();"></td>
+                        </tr>
+						<tr>
+                            <td colspan="3">
+								<table cellspacing="0" cellpadding="1" id="debug">
+									
+								</table>
+							</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+			<tr>
+                <td colspan="3" style="padding-top:8px;" align="center">
+                    <input style="display:none;" id="download" type="button" value="Download File" onClick="ui.download();">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" style="padding-top:8px;"><a href="https://github.com/Silver-D/ToVIE" target="_blank">GitHub repository</a>.
+            </tr>
+        </table>
+    </body>
+    <script src="tovie.js"></script>
+    <script src="tovie_db.js"></script>
+    <script src="tovie_ui.js"></script>
+    <script src="filesaver.min.js"></script>
+    <script>
+        ui.init();
+    </script>
+</html>
