@@ -17,8 +17,9 @@ map.attrs =
     'type':       { offs: 31,  size: 1,  debug: true,  },
     'sometype?':  { offs: 20,  size: 4,  debug: true,  },
     'subtype':    { offs: 24,  size: 4,  debug: true,  },
-    'equip_by':   { offs: 16,  size: 4,  debug: true, },
-    'icon':       { offs: 32,  size: 32, debug: true,  },
+    'equip_by':   { offs: 16,  size: 4,  debug: true,  },
+    'icon':       { offs: 32,  size: 32, debug: false, },
+	'model':	  { offs: 700, size: 4,  debug: false, },
     'patk':       { offs: 76,  size: 4,  debug: false, },
     'matk':       { offs: 80,  size: 4,  debug: false, },
     'pdef':       { offs: 84,  size: 4,  debug: false, },
@@ -77,7 +78,8 @@ map.irrelevant =
     'seq_ind1': { offs: 4,   size: 4, },
     'seq_ind2': { offs: 68,  size: 4, },
     'seq_ind3': { offs: 172, size: 4, },
-    //'seq_ind4': { offs: 704, size: 4, },
+	
+	'seq_ind4': { offs: 704, size: 4, },
     
     'static1':  { offs: 64,  size: 4 }, // 0023
     'static2':  { offs: 72,  size: 4 }, // 0001

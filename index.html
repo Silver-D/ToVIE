@@ -15,8 +15,8 @@
     <body>
         <table cellspacing="0" cellpadding="0">
             <tr>
-                <td colspan="3" style="padding-bottom:4px;">
-                    <a href="#" onClick="$('read_me').style.display = ($('read_me').style.display == 'none') ? 'block' : 'none';  return false;">READ ME</a>
+                <td colspan="3" style="padding-bottom:8px;">
+                    <a href="#" onClick="$('read_me').style.display = ($('read_me').style.display == 'none') ? 'block' : 'none';  return false;">READ ME</a> | <a href="https://github.com/Silver-D/ToVIE" target="_blank">GitHub repository</a>.
                     <div id="read_me" style="display:none;">
                         <ul>
                             <li>
@@ -153,8 +153,14 @@
                                 
                             </td>
                         </tr>
+						<tr>
+                            <td colspan="3" style="padding-top:8px;padding-bottom:8px;">
+							Use in-game model: <span id="replace_model"></span><br>
+							<label><input type="checkbox" id="replace_icon"> Also use selected item's graphic icon.</label>
+							<input type="hidden" id="model"></td>
+                        </tr>
                         <tr>
-                            <td colspan="3" align="center" style="padding:8px;"><input type="button" value="Apply" style="width:400px;font-size:16px;" onClick="ui.apply();"></td>
+                            <td colspan="3" align="center" style="padding:8px;"><input type="button" value="Apply" style="width:400px;font-size:15px;" onClick="ui.apply();"></td>
                         </tr>
 						<tr>
                             <td colspan="3" align="center" style="color: darkred;" id="apply_warn">&nbsp;</td>
@@ -164,15 +170,15 @@
 								<table cellspacing="0" cellpadding="0" >
 									<tr>
 									    <td><b>Misc info:</b></td>
-									    <td style="display:none;"><b>Unknown:</b></td>
+									    <td style="padding-left:8px;"><b>Unknown:</b></td>
 									</tr>
 									<tr>
 									    <td valign="top">
 									        <table cellspacing="0" cellpadding="2" id="debug">
 									        </table>
 									    </td>
-									    <td valign="top">
-									        <table cellspacing="0" cellpadding="2" id="unmapped" style="display:none;">
+									    <td style="padding-left:8px;" valign="top">
+									        <table cellspacing="0" cellpadding="2" id="unmapped" style="">
 									        </table>
 									    </td>
 									</tr>
@@ -183,23 +189,20 @@
                 </td>
             </tr>
 			<tr>
-                <td colspan="3" style="padding-top:8px;" align="center">
+                <td colspan="3" style="padding-top:12px;" align="center">
                     <input style="display:none; width:320px;font-size:16px;" id="download" type="button" value="Download File" onClick="ui.download();">
                 </td>
             </tr>
-            <tr>
-                <td colspan="3" style="padding-top:8px;"><a href="https://github.com/Silver-D/ToVIE" target="_blank">GitHub repository</a>.
-            </tr>
         </table>
-		<div id="synth_window" style="display:none; border:1px solid #000000; overflow:auto; position:absolute; z-index:99; top:100px;right:100px; background-color: #d8d8d8; width:640px;height:400px;">
+		<div id="item_window" style="display:none; border:1px solid #000000; overflow:auto; position:absolute; z-index:99; top:100px;right:100px; background-color: #d8d8d8; width:640px;height:400px;">
 			<table cellspacing="0" cellpadding="4" width="100%">
 				<tr>
-					<td><b>Search</b>: <input type="text" id="synth_search" style="width:300px;" autofocus></td>
-					<td align="center" style=""><a href="#" onClick="$('synth_window').style.display ='none'; return false;">Close</td>
+					<td><b>Search</b>: <input type="text" id="item_search" style="width:300px;" autofocus></td>
+					<td align="center" style=""><a href="#" onClick="$('item_window').style.display ='none'; return false;">Close</td>
 				</tr>
 				<tr>
 					<td colspan="2" style="" valign="top">
-						<table cellspacing="0" cellpadding="2" id="synth_results">
+						<table cellspacing="0" cellpadding="2" id="item_results">
 						</table>
 					</td>
 				</tr>

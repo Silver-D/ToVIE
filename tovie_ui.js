@@ -19,7 +19,7 @@ var ui =
         $('results').style.display   	= 'none';
         $('item_info').style.display 	= 'none';
         $('download').style.display  	= 'none';
-		$('synth_window').style.display = 'none';
+		$('item_window').style.display = 'none';
         
         if ($('skill1').options.length > 1)
 		return;
@@ -57,7 +57,7 @@ var ui =
                 e.setAttribute('id', e.getAttribute('id') + i);
 				
 				if (s)
-				e.onclick = function() { ui.synthWindow(s, i);  return false; };
+				e.onclick = function() { ui.itemWindow({ search: 'synth', i: s, j: i });  return false; };
             }
             
             $('synth_num_' + i).innerHTML = i;
@@ -123,11 +123,16 @@ var ui =
         if (title == '')
         return this.results(results);
         
-        items.list.forEach((e, k) =>
+        for (k in items.list)
         {
+			if (!items.list.hasOwnProperty(k))
+			continue;
+			
+			let e = items.list[k];
+			
             if (db.items[e.id.h].toLowerCase().includes(title))
             results.push(k);
-        });
+        };
         
         return this.results(results);
     },
@@ -137,21 +142,24 @@ var ui =
         var type    = $('s_cat').value;
         var results = [];
         
-        items.list.forEach((e, k) =>
+        for (k in items.list)
         {
-            if (e.type.h == type)
+			if (!items.list.hasOwnProperty(k))
+			continue;
+
+            if (items.list[k].type.h == type)
             results.push(k);
-        });
+        };
         
         return this.results(results);
     },
     
     results: function(results)
     {
-        $('results').style.display   	= 'block';
-        $('item_info').style.display 	= 'none';
-		$('download').style.display  	= '';
-		$('synth_window').style.display = 'none';
+        $('results').style.display     = 'block';
+        $('item_info').style.display   = 'none';
+		$('download').style.display    = '';
+		$('item_window').style.display = 'none';
 		
 		$('sel_item').innerHTML = '';
         
@@ -185,11 +193,11 @@ var ui =
         $('title').innerHTML      = `${db.items[item.id.h]}`;
 		$('apply_warn').innerHTML = '&nbsp;';
         
-        $('item_info').style.display 	= 'block';
-		$('ele_res').style.display   	= 'none';
-		$('atk_aff').style.display   	= 'none';
-		$('skills').style.display    	= 'none';
-		$('synth_window').style.display = 'none';
+        $('item_info').style.display   = 'block';
+		$('ele_res').style.display     = 'none';
+		$('atk_aff').style.display     = 'none';
+		$('skills').style.display      = 'none';
+		$('item_window').style.display = 'none';
 		
 		if (type == 'weapons')
 		el_type = 'atk_aff';
@@ -225,6 +233,9 @@ var ui =
 				$('synth_on_1').checked = (item[a].d >= 1);
 				$('synth_on_2').checked = (item[a].d == 2);
 			}
+			
+			else if (a == 'icon')
+			$('replace_icon').checked = (db.icons[db.models[item.model.h]] == item.icon.h)
             
             let e = $(a);
             
@@ -239,9 +250,30 @@ var ui =
 				else if (type != 'subweapons')
 				e.value = (item[a].d > 0) ? '+' + item[a].d : item[a].d;
 			}
-            
+
 			else
             e.value = item[a].d;
+			
+			if (a == 'model')
+			{
+				if (item[a].d > -1)
+				{
+					let t = '';
+					
+					t = `<a href="#" onClick="ui.itemWindow({ search: 'models', target: '${item.id.h}' }); return false;">${db.items[db.models[item[a].h]]}`;
+					
+					// TODO: needs a new default map
+					//if (item.model.h == db.default_models[item.id.h])
+					//t += ' (Default)';
+					
+					t += '</a>';
+					
+					$('replace_model').innerHTML = t;
+				}
+				
+				else
+				$('replace_model').innerHTML = "N/A";
+			}
         }
         
         let c = 1;
@@ -275,7 +307,7 @@ var ui =
 			this.synthSetIng($('synth_i' + i + '_' + j).value, i, j, false);
 		}
         
-        $('debug').innerHTML += "<tr><td colspan='3'><a href='#' onClick='console.log( { " + key + ": items.list[$(\"sel_item\").value] }); return false;'>Dump item to console.log</a></td></tr>";
+        $('debug').innerHTML += "<tr><td colspan='3'><a href='#' onClick='console.log(items.list[$(\"sel_item\").value]); return false;'>Dump item to console.log</a></td></tr>";
     },
 	
 	synthSetIng: function(id, i, j, manual)
@@ -314,41 +346,60 @@ var ui =
 		$('synth_t_' + j).value = num;
 	},
 	
-	synthWindow: function(i, j)
+	itemWindow: function(opts)
 	{
-		$('synth_window').style.display = 'block';
-		$('synth_search').focus();
+		$('item_window').style.display = 'block';
+		$('item_search').focus();
 		
-		$('synth_search').oninput = function() { ui.synthSearch(this.value, i, j); };
+		$('item_search').oninput = function() { ui.itemSearch(this.value, opts); };
 		
-		if ($('synth_search').value)
-		$('synth_search').value = '';
+		if ($('item_search').value)
+		$('item_search').value = '';
 		
-		this.synthSearch($('synth_search').value, i, j);
+		this.itemSearch($('item_search').value, opts);
 	},
 	
-	synthSearch: function(str, i, j)
+	itemSearch: function(str, opts)
 	{
 		var results = [];
 		
 		str = str.toLowerCase().trim();
 		
-		for (let m in db.mats)
+		if (opts.search == 'synth')
 		{
-			if (!db.mats.hasOwnProperty(m))
-			continue;
+			for (let m in db.mats)
+			{
+				if (!db.mats.hasOwnProperty(m))
+				continue;
+				
+				if (!str.length || db.mats[m].toLowerCase().includes(str))
+				results.push(m);
+			}
 			
-			if (!str.length || db.mats[m].toLowerCase().includes(str))
-			results.push(m);
+			for (let m in db.items)
+			{
+				if (!db.items.hasOwnProperty(m))
+				continue;
+				
+				if (!str.length || db.items[m].toLowerCase().includes(str))
+				results.push(m);
+			}
 		}
 		
-		for (let m in db.items)
+		else if (opts.search == 'models')
 		{
-			if (!db.items.hasOwnProperty(m))
-			continue;
-			
-			if (!str.length || db.items[m].toLowerCase().includes(str))
-			results.push(m);
+			for (let m in db.models)
+			{
+				if (!db.models.hasOwnProperty(m))
+				continue;
+				
+				let item = items.list[db.models[m]];
+				
+				if (item.subtype.d == items.list[opts.target].subtype.d &&
+					items.list[opts.target].equip_by.d == (items.list[opts.target].equip_by.d & item.equip_by.d) &&
+					(!str.length || db.items[db.models[m]].toLowerCase().includes(str)))
+				results.push(db.models[m]);
+			}
 		}
 		
 		let c = 1;
@@ -361,7 +412,17 @@ var ui =
 			if (c == 1)
 			t += '<tr>';
 			
-			t += `<td><a href="#" onclick="ui.synthSetIng(${id}, ${i}, ${j}, true); $('synth_window').style.display = 'none'; return false;">` + (db.mats[v] || db.items[v]) + '</a></td>';
+			t += '<td><a href="#" onclick="';
+			
+			if (opts.search == 'synth')
+			t += `ui.synthSetIng(${id}, ${opts.i}, ${opts.j}, true);`;
+			
+			else if (opts.search == 'models')
+			{
+				t += `$('model').value = '${parseInt(db.default_models[v], 16)}'; $('replace_model').getElementsByTagName('a')[0].innerHTML = this.innerHTML;`;
+			}
+			
+			t += " $('item_window').style.display = 'none'; return false;\">" + (db.mats[v] || db.items[v]) + '</a></td>';
 			
 			if (c == 3)
 			{
@@ -372,7 +433,7 @@ var ui =
 			c++;
 		});
 		
-		$('synth_results').innerHTML = t;
+		$('item_results').innerHTML = t;
 	},
 	
 	apply: function()
@@ -398,6 +459,15 @@ var ui =
 				else
 				data[a] = 0;
 			}
+			
+			if (a == 'icon' && item.model.d >= 0)
+			{
+				if ($('replace_icon').checked)
+				data[a] = db.icons[db.models[toHex($('model').value, map.attrs.model.size * 2)]];
+				
+				else
+				data[a] = db.icons[item.id.h];
+			}
             
             let e = $(a);
             
@@ -410,7 +480,7 @@ var ui =
 				continue;
 			}
 			
-			let value = parseInt(e.value.trim())|| 0;
+			let value = parseInt(e.value) || 0;
 			
             if (['elef', 'elei', 'elew', 'elee', 'eled', 'elel'].indexOf(a) != -1)
 			{

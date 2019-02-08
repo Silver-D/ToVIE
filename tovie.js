@@ -40,7 +40,7 @@ function processBinary(result)
         items[map.types[i]] = 0;
     }
     
-    items.list = [];
+    items.list = {};
     
     while(processItem(items.total))
     items.total++;
@@ -49,39 +49,36 @@ function processBinary(result)
 function processItem(index)
 {
     var offset = map.info.header + (index * map.info.item);
-    var id     = getAttr('id', offset).d;
+    var id     = getAttr('id', offset).h;
     var type   = map.types[getAttr('type', offset).h];
     
-    if (items.total && !id)
+    if (items.total && !parseInt(id, 16))
     return false;
 
     if (typeof type == 'undefined')
     return true;
+	
+	items[type]++;
     
-    items.list.push({ });
-    
-    let i = items.list.length - 1;
-    
+    items.list[id] = { index: items.total };
+
     for (let a in map.attrs)
     {
         if (!map.attrs.hasOwnProperty(a))
         continue;
         
-        items.list[i][a]       = getAttr(a, offset);
-        items.list[i]['index'] = items.total;
+        items.list[id][a] = getAttr(a, offset);
     }
     
-    items.list[i].unmapped = {};
+    items.list[id].unmapped = {};
     
     for (let a in map.unmapped)
     {
         if (!map.unmapped.hasOwnProperty(a))
         continue;
         
-        items.list[i].unmapped[a] = getData(offset, map.unmapped[a].offs, map.unmapped[a].size, a);
+        items.list[id].unmapped[a] = getData(offset, map.unmapped[a].offs, map.unmapped[a].size, a);
     }
-    
-    items[type]++;
     
     return true;
 }
@@ -99,8 +96,8 @@ function getData(e_offset, a_offset, a_size, a_name)
     ret += toHex(bin[e_offset + a_offset + i], 2);
         
     if (a_name == 'icon')
-    return { h: hex2ascii(ret), d: ''};
-        
+    return { h: ret, d: hex2ascii(ret) };
+	
     return { h: ret, d: toInt(ret) };
 }
 
@@ -122,8 +119,14 @@ function setAttrs(key, data)
             else if (map.attrs[a].size == 2)
             data[a] = new Uint16Array([data[a]])[0];
         }
+		
+		let v = '';
         
-        let v = toHex(data[a], map.attrs[a].size * 2);
+		if (a == 'icon')
+		v = data[a];
+		
+		else
+        v = toHex(data[a], map.attrs[a].size * 2);
         
         for (let i = 0; i < map.attrs[a].size; i++)
         bin[offset + map.attrs[a].offs + i] = parseInt(v.substr(i * 2, 2), 16);
