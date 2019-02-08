@@ -1,6 +1,8 @@
 # ToVIE
 Tales of Vesperia Item Editor
 
+Written in JavaScript.
+
 You can use the editor online at my github page: https://silver-d.github.io/ToVIE/
 
 Or you can download the zip file from here and double-click on the index.html and use it from your harddrive.
