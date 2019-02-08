@@ -24,7 +24,7 @@ var ui =
         if ($('skill1').options.length > 1)
 		return;
 		
-		for (let i = 1; i <= info.synth_ing; i++)
+		for (let i = 1; i <= map.info.synth_ing; i++)
 		{
 			let t = '';
 			
@@ -33,7 +33,7 @@ var ui =
 			t += '<input class="synth" type="hidden" id="synth_i' + i + '_"></td>';
 			t += '<td style="width:24px;"><input class="synth" type="text" style="width:20px;" maxlength="2" id="synth_c' + i + '_">';
 			
-			if (i == info.synth_ing)
+			if (i == map.info.synth_ing)
 			t += '<input class="synth" type="hidden" id="synth_t_">';
 			
 			t += '</td></tr>';
@@ -101,14 +101,14 @@ var ui =
         $('a_cnt').innerHTML = items.armors;
         $('t_cnt').innerHTML = items.trinkets;
         
-        for (let i in types)
+        for (let i in map.types)
         {
-            if (!types.hasOwnProperty(i))
+            if (!map.types.hasOwnProperty(i))
             continue;
             
             let o = document.createElement("OPTION");
             
-            o.text  = types[i];
+            o.text  = map.types[i];
             o.value = i;
             
             $('s_cat').options.add(o);
@@ -179,7 +179,7 @@ var ui =
         if (!item)
         return;
         
-        var type    = types[item.type.h];
+        var type    = map.types[item.type.h];
 		var el_type = '';
 		
         $('title').innerHTML      = `${db.items[item.id.h]}`;
@@ -203,15 +203,22 @@ var ui =
 		if (type == 'weapons' || type == 'subweapons')
 		$('skills').style.display = 'table-row';
 		
-		$('debug').innerHTML = '<tr><td colspan="2"><b>Debug info:</b></td></tr>';
-        
-        for (let a in attrs)
+		$('debug').innerHTML    = '';
+		$('unmapped').innerHTML = '';
+		
+		let num_d = 0;
+
+        for (let a in map.attrs)
         {
-            if (!attrs.hasOwnProperty(a))
+            if (!map.attrs.hasOwnProperty(a))
             continue;
 			
-			if (attrs[a].debug)
-			$('debug').innerHTML += `<tr><td>${a}:</td><td>${item[a].h}</td></tr>`;
+			if (map.attrs[a].debug)
+			{
+			    $('debug').innerHTML += `<tr><td>${a}:</td><td>${map.attrs[a].offs}:</td><td>${item[a].h}</td></tr>`;
+			    
+			    num_d++;
+			}
 			
 			if (a == 'synth_show')
 			{
@@ -236,42 +243,69 @@ var ui =
 			else
             e.value = item[a].d;
         }
+        
+        let c = 1;
+        let t = '';
+        
+        for (let a in item.unmapped)
+        {
+            if (!item.unmapped.hasOwnProperty(a))
+            continue;
+            
+            if (c == 1)
+            t += '<tr>';
+            
+            t += `<td>${a}:</td><td>${item.unmapped[a].h}</td><td>(${item.unmapped[a].d})</td>`;
+            
+            if (c == 3)
+            {
+                t += '</tr>';
+                
+                c = 0;
+            }
+            
+            c++;
+        }
+        
+        $('unmapped').innerHTML = t;
 		
 		for (let j = 1; j <= 2; j++)
 		{
-			for (let i = 1; i <= info.synth_ing; i++)
-			this.synthSetIng($('synth_i' + i + '_' + j).value, i, j);
+			for (let i = 1; i <= map.info.synth_ing; i++)
+			this.synthSetIng($('synth_i' + i + '_' + j).value, i, j, false);
 		}
         
-        $('debug').innerHTML += "<tr><td colspan='2'><a href='#' onClick='console.log( { " + key + ": items.list[$(\"sel_item\").value] }); return false;'>Dump item to console.log</a></td></tr>";
+        $('debug').innerHTML += "<tr><td colspan='3'><a href='#' onClick='console.log( { " + key + ": items.list[$(\"sel_item\").value] }); return false;'>Dump item to console.log</a></td></tr>";
     },
 	
-	synthSetIng: function(id, i, j)
+	synthSetIng: function(id, i, j, manual)
 	{
-		let id_h = toHex(id, 4);
-		let num	 = 0;
+		var id_h = toHex(id, 4);
 		
-		for (let k = 1; k <= info.synth_ing; k++)
+		if (manual)
 		{
-			if (Number($('synth_i' + k + '_' + j).value) > 0)
-			num++;
-		}
-
+            if (Number(id) > 0 && i == 1 && Number($('synth_i1_' + j).value) == 0)
+            {
+                if (j == 1)
+                $('synth_on_1').checked = true;
+            
+                if (j == 2 && Number($('synth_t_1').value) > 0 && $('synth_on_1').checked)
+                $('synth_on_2').checked = true;
+            }
+            
+            if (Number(id) == 0)
+            $('synth_c' + i + '_' + j).value = '0';
+        
+            else if (Number($('synth_c' + i + '_' + j).value) == 0)
+		    $('synth_c' + i + '_' + j).value = '1';
+        }
+		
 		$('synth_i' + i + '_' + j).value = id;
 		$('synth_sel' + i + '_' + j).innerHTML = db.mats[id_h] || db.items[id_h];
 		
-		if (!num && Number(id) > 0)
-		{
-			if (j == 1)
-			$('synth_on_1').checked = true;
-			
-			if (j == 2 && Number($('synth_t_1').value) > 0 && $('synth_on_1').checked)
-			$('synth_on_2').checked = true;
-		}
+		let num = 0;
 		
-		num = 0;
-		
-		for (let k = 1; k <= info.synth_ing; k++)
+		for (let k = 1; k <= map.info.synth_ing; k++)
 		{
 			if (Number($('synth_i' + k + '_' + j).value) > 0)
 			num++;
@@ -283,9 +317,12 @@ var ui =
 	synthWindow: function(i, j)
 	{
 		$('synth_window').style.display = 'block';
+		$('synth_search').focus();
 		
-		$('synth_search').value = '';
 		$('synth_search').oninput = function() { ui.synthSearch(this.value, i, j); };
+		
+		if ($('synth_search').value)
+		$('synth_search').value = '';
 		
 		this.synthSearch($('synth_search').value, i, j);
 	},
@@ -293,7 +330,6 @@ var ui =
 	synthSearch: function(str, i, j)
 	{
 		var results = [];
-		var t		= '';
 		
 		str = str.toLowerCase().trim();
 		
@@ -316,6 +352,7 @@ var ui =
 		}
 		
 		let c = 1;
+		let t = '';
 
 		results.forEach((v, k) =>
 		{
@@ -324,7 +361,7 @@ var ui =
 			if (c == 1)
 			t += '<tr>';
 			
-			t += `<td><a href="#" onclick="ui.synthSetIng(${id}, ${i}, ${j}); $('synth_window').style.display = 'none'; return false;">` + (db.mats[v] || db.items[v]) + '</a></td>';
+			t += `<td><a href="#" onclick="ui.synthSetIng(${id}, ${i}, ${j}, true); $('synth_window').style.display = 'none'; return false;">` + (db.mats[v] || db.items[v]) + '</a></td>';
 			
 			if (c == 3)
 			{
@@ -342,12 +379,12 @@ var ui =
 	{
 		var key  = $('sel_item').value;
 		var item = items.list[key];
-		var type = types[item.type.h];
+		var type = map.types[item.type.h];
 		var data = { };
 		
-		for (let a in attrs)
+		for (let a in map.attrs)
         {
-            if (!attrs.hasOwnProperty(a))
+            if (!map.attrs.hasOwnProperty(a))
             continue;
 			
 			if (a == 'synth_show')
@@ -390,10 +427,9 @@ var ui =
 		
 		setAttrs(key, data);
 		
-		let warn = '';
-		
 		this.displayItem(key);
 		
+		let warn = '';
 		let hi_lvl = false;
 		
 		for (j = 1; j <= 2; j++)
@@ -401,7 +437,7 @@ var ui =
 			let last = 0;
 			let no_c = false;
 			
-			for (i = 1; i <= info.synth_ing; i++)
+			for (i = 1; i <= map.info.synth_ing; i++)
 			{
 				if (Number(data['synth_i' + i + '_' + j]) > 0)
 				{
@@ -425,11 +461,7 @@ var ui =
 		if (!warn && hi_lvl)
 		warn = "The maximum attainable synth level in the game is 17. But I won't stop you.";
 		
-		if (warn)
-		$('apply_warn').innerHTML = warn;
-		
-		else
-		$('apply_warn').innerHTML = '&nbsp;';
+		$('apply_warn').innerHTML = (warn) ? warn : '&nbsp;';
 	},
 	
 	download: function()

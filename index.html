@@ -135,7 +135,7 @@
                                 <table cellspacing="0" class="synth" cellpadding="4" border="1" id="synth_">
                                     <tr>
                                         <td >Synth <span class="synth" id="synth_num_"></span></td>
-										<td align="right"><label><input type="checkbox" class="synth" id="synth_on_"> Enabled</label></td>
+										<td align="left"><label><input type="checkbox" class="synth" id="synth_on_"> Enabled</label></td>
                                     </tr>
                                     <tr>
                                         <td>Level: <input class="synth" id="synth_l_" type="text" size="2" maxlength="2"></td>
@@ -154,15 +154,28 @@
                             </td>
                         </tr>
                         <tr>
-                            <td colspan="3" align="center" style="padding:8px;"><input type="button" value="Apply" style="width:400px;" onClick="ui.apply();"></td>
+                            <td colspan="3" align="center" style="padding:8px;"><input type="button" value="Apply" style="width:400px;font-size:16px;" onClick="ui.apply();"></td>
                         </tr>
 						<tr>
                             <td colspan="3" align="center" style="color: darkred;" id="apply_warn">&nbsp;</td>
                         </tr>
 						<tr>
                             <td colspan="3">
-								<table cellspacing="0" cellpadding="1" id="debug">
-									
+								<table cellspacing="0" cellpadding="0" >
+									<tr>
+									    <td><b>Misc info:</b></td>
+									    <td style="display:none;"><b>Unknown:</b></td>
+									</tr>
+									<tr>
+									    <td valign="top">
+									        <table cellspacing="0" cellpadding="2" id="debug">
+									        </table>
+									    </td>
+									    <td valign="top">
+									        <table cellspacing="0" cellpadding="2" id="unmapped" style="display:none;">
+									        </table>
+									    </td>
+									</tr>
 								</table>
 							</td>
                         </tr>
@@ -171,18 +184,18 @@
             </tr>
 			<tr>
                 <td colspan="3" style="padding-top:8px;" align="center">
-                    <input style="display:none;" id="download" type="button" value="Download File" onClick="ui.download();">
+                    <input style="display:none; width:320px;font-size:16px;" id="download" type="button" value="Download File" onClick="ui.download();">
                 </td>
             </tr>
             <tr>
                 <td colspan="3" style="padding-top:8px;"><a href="https://github.com/Silver-D/ToVIE" target="_blank">GitHub repository</a>.
             </tr>
         </table>
-		<div id="synth_window" style="display:none; border:1px solid #000000; overflow:auto; position:absolute; z-index:99; top:100px;right:100px; background-color: #d8d8d8; width:620px;height:380px;">
+		<div id="synth_window" style="display:none; border:1px solid #000000; overflow:auto; position:absolute; z-index:99; top:100px;right:100px; background-color: #d8d8d8; width:640px;height:400px;">
 			<table cellspacing="0" cellpadding="4" width="100%">
 				<tr>
 					<td><b>Search</b>: <input type="text" id="synth_search" style="width:300px;" autofocus></td>
-					<td align="right"><a href="#" onClick="$('synth_window').style.display ='none'; return false;">Close&nbsp;</td>
+					<td align="center" style=""><a href="#" onClick="$('synth_window').style.display ='none'; return false;">Close</td>
 				</tr>
 				<tr>
 					<td colspan="2" style="" valign="top">
@@ -193,9 +206,10 @@
 			</table>
 		</div>
     </body>
-    <script src="tovie.js?v=1"></script>
-    <script src="tovie_db.js?v=1"></script>
-    <script src="tovie_ui.js?v=1"></script>
+    <script src="tovie.js?v=2"></script>
+    <script src="tovie_map.js?v=2"></script>
+    <script src="tovie_db.js?v=2"></script>
+    <script src="tovie_ui.js?v=2"></script>
     <script src="filesaver.min.js?v=1"></script>
     <script>
         ui.init();
